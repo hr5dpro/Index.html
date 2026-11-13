@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ألغاز الحارة القديمة</title>
+<style>
+:root{--bg:#f6ecd9;--card:#fffaf0;--ink:#3b2412;--accent:#a3411f;--accent2:#2f6b4f;--line:#d9c3a0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d140d;--card:#2a1c12;--ink:#f3e6d0;--accent:#e0794f;--accent2:#6bbf94;--line:#4a3523}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",sans-serif;line-height:1.7}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:1.6rem;margin:8px 0;color:var(--accent);text-align:center}
+.sub{text-align:center;margin:0 0 16px;opacity:.85}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:12px 0}
+.who{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.avatar{font-size:2.4rem;width:60px;height:60px;border-radius:50%;background:var(--bg);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;flex:none}
+.name{font-weight:700}.role{font-size:.85rem;opacity:.75}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:6px 0 2px}
+.bar i{display:block;height:100%;width:0;background:var(--accent2);transition:width .4s}
+.items{display:flex;gap:8px;justify-content:center;font-size:1.6rem;min-height:2.2rem}
+button{font:inherit;width:100%;margin:6px 0;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.main{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+button.ok{background:var(--accent2);color:#fff}button.bad{background:#b3261e;color:#fff}
+.msg{min-height:1.6rem;text-align:center;font-weight:600}
+.hide{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>🏯 ألغاز الحارة القديمة</h1>
+<p class="sub">في أزقة الحارة العتيقة، ثلاثة أهالٍ يحرسون مفاتيح بوابة القلعة. حلّ ألغازهم لتفتح الباب.</p>
+<div class="card">
+  <div class="items" id="items" aria-label="المفاتيح"></div>
+  <div class="bar"><i id="bar"></i></div>
+</div>
+<div id="stage"></div>
+</main>
+<script>
+var L=[
+{e:"👵",n:"أم سعيد",r:"بائعة الحلوى العمانية",k:"🍯",
+ q:"أنا حلوة وتُقدَّم معي القهوة، يُحرَّك قدري ساعات طويلة على النار، ولا يخلو منّي عيد ولا ضيافة. ما أنا؟",
+ o:["الحلوى العمانية","التمر","الخبز"],a:0,
+ w:"يا بنتي، ما أحلى ما قلتِ! خذ هذا مفتاح العسل."},
+{e:"👳",n:"الشيخ راشد",r:"حارس الفلج",k:"💧",
+ q:"أجري بلا أرجل، وأسقي النخيل بلا أيدٍ، أنزل من الجبل ولا أتعب، وأهل القرية يتقاسمونني بالساعات. ما أنا؟",
+ o:["الريح","الفلج","السحاب"],a:1,
+ w:"أحسنت! الفلج حياة الحارة. هذا مفتاح الماء."},
+{e:"🧔",n:"حمود",r:"صانع الخناجر",k:"🗡️",
+ q:"لي غمد وحزام، أُلبَس فخراً لا حرباً، وأُزيّن به الرجال في المناسبات، ورمزي على راية عُمان. ما أنا؟",
+ o:["السيف","العصا","الخنجر"],a:2,
+ w:"صحيح! الخنجر العماني فخر الرجال. هذا مفتاح الفضة."}
+];
+var step=0,got=[];
+var st=document.getElementById("stage");
+function ui(){
+  document.getElementById("bar").style.width=(got.length/3*100)+"%";
+  document.getElementById("items").textContent=got.join(" ");
+}
+function show(){
+  ui();
+  if(step>=L.length){win();return}
+  var c=L[step];
+  st.innerHTML="";
+  var d=document.createElement("div");d.className="card";
+  d.innerHTML='<div class="who"><div class="avatar">'+c.e+'</div><div><div class="name">'+c.n+'</div><div class="role">'+c.r+' · اللغز '+(step+1)+' من 3</div></div></div><p>'+c.q+'</p><div id="opts"></div><div class="msg" id="msg"></div>';
+  st.appendChild(d);
+  var box=d.querySelector("#opts");
+  c.o.forEach(function(t,i){
+    var b=document.createElement("button");b.textContent=t;
+    b.onclick=function(){pick(b,i)};box.appendChild(b);
+  });
+}
+function pick(b,i){
+  var c=L[step],m=document.getElementById("msg");
+  if(i===c.a){
+    b.className="ok";m.textContent=c.n+": "+c.w;
+    got.push(c.k);ui();
+    var all=document.querySelectorAll("#opts button");
+    all.forEach(function(x){x.disabled=true});
+    var nx=document.createElement("button");nx.className="main";
+    nx.textContent=step<2?"اللغز التالي ←":"إلى بوابة القلعة ←";
+    nx.onclick=function(){step++;show()};
+    document.getElementById("opts").appendChild(nx);
+  }else{
+    b.className="bad";b.disabled=true;
+    m.textContent="لا يا ولدي، فكّر مرة ثانية!";
+  }
+}
+function win(){
+  st.innerHTML='<div class="card" style="text-align:center"><div style="font-size:3rem">🏰</div><h2 style="color:var(--accent2)">انفتحت البوابة!</h2><p>جمعتَ مفاتيح العسل والماء والفضة، وأهل الحارة يرحّبون بك في القلعة. أنت الآن ضيف الحارة.</p><button class="main" id="again">العب من جديد</button></div>';
+  document.getElementById("again").onclick=function(){step=0;got=[];show()};
+}
+show();
+</script>
+</body>
+</html>
